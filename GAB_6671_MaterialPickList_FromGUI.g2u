@@ -1,0 +1,176 @@
+﻿Program.Sub.ScreenSU.Start
+Gui.Form..Create(BaseForm)
+Gui.Form..Caption("Print Material Picklist")
+Gui.Form..Size(401,106)
+Gui.Form..MinX(0)
+Gui.Form..MinY(0)
+Gui.Form..Position(0,0)
+Gui.Form..AlwaysOnTop(False)
+Gui.Form..FontName("Tahoma")
+Gui.Form..FontSize(8.25)
+Gui.Form..ControlBox(True)
+Gui.Form..MaxButton(False)
+Gui.Form..MinButton(False)
+Gui.Form..MousePointer(0)
+Gui.Form..Moveable(True)
+Gui.Form..Sizeable(False)
+Gui.Form..ShowInTaskBar(True)
+Gui.Form..TitleBar(True)
+Gui.Form..Event(UnLoad,Form_UnLoad)
+Gui.Form.txtJobStart.Create(TextBox,"",True,75,20,0,14,43,True,0,"Tahoma",8.25,,1)
+Gui.Form.txtJobStart.MaxLength(6)
+Gui.Form.txtJobStart.TabStop(True)
+Gui.Form.txtJobStart.TabIndex(10)
+Gui.Form.lbl1.Create(Label,"Starting Job / Suffix",True,96,13,0,15,27,True,0,"Tahoma",8.25,,0,0)
+Gui.Form.lbl1.BorderStyle(0)
+Gui.Form.txtSfxStart.Create(TextBox,"",True,36,20,0,92,43,True,0,"Tahoma",8.25,,1)
+Gui.Form.txtSfxStart.TabStop(True)
+Gui.Form.txtSfxStart.TabIndex(20)
+Gui.Form.cmdBrowseStart.Create(Button)
+Gui.Form.cmdBrowseStart.Enabled(True)
+Gui.Form.cmdBrowseStart.Visible(True)
+Gui.Form.cmdBrowseStart.Zorder(0)
+Gui.Form.cmdBrowseStart.Size(23,23)
+Gui.Form.cmdBrowseStart.Position(131,43)
+Gui.Form.cmdBrowseStart.Caption("")
+Gui.Form.cmdBrowseStart.FontName("Tahoma")
+Gui.Form.cmdBrowseStart.FontSize(8.25)
+Gui.Form.cmdBrowseStart.SvgPicture("icon_browser_color")
+Gui.Form.cmdBrowseStart.Event(Click,cmdWO_Click)
+Gui.Form.cmdBrowseStart.TabStop(True)
+Gui.Form.cmdBrowseStart.TabIndex(30)
+Gui.Form.lbl2.Create(Label,"Ending Job / Suffix",True,90,13,0,187,27,True,0,"Tahoma",8.25,,0,0)
+Gui.Form.lbl2.BorderStyle(0)
+Gui.Form.txtJobEnd.Create(TextBox,"",True,75,20,0,187,43,True,0,"Tahoma",8.25,,1)
+Gui.Form.txtJobEnd.TabStop(True)
+Gui.Form.txtJobEnd.TabIndex(40)
+Gui.Form.txtSfxEnd.Create(TextBox,"",True,36,20,0,265,43,True,0,"Tahoma",8.25,,1)
+Gui.Form.txtSfxEnd.TabStop(True)
+Gui.Form.txtSfxEnd.TabIndex(50)
+Gui.Form.cmdBrowseEnd.Create(Button)
+Gui.Form.cmdBrowseEnd.Enabled(True)
+Gui.Form.cmdBrowseEnd.Visible(True)
+Gui.Form.cmdBrowseEnd.Zorder(0)
+Gui.Form.cmdBrowseEnd.Size(23,23)
+Gui.Form.cmdBrowseEnd.Position(304,43)
+Gui.Form.cmdBrowseEnd.Caption("")
+Gui.Form.cmdBrowseEnd.FontName("Tahoma")
+Gui.Form.cmdBrowseEnd.FontSize(8.25)
+Gui.Form.cmdBrowseEnd.SvgPicture("icon_browser_color")
+Gui.Form.cmdBrowseEnd.Event(Click,cmdWO_Click)
+Gui.Form.cmdBrowseEnd.TabStop(True)
+Gui.Form.cmdBrowseEnd.TabIndex(60)
+Gui.Form.cmdGo.Create(Button)
+Gui.Form.cmdGo.Enabled(True)
+Gui.Form.cmdGo.Visible(True)
+Gui.Form.cmdGo.Zorder(0)
+Gui.Form.cmdGo.Size(23,23)
+Gui.Form.cmdGo.Position(364,41)
+Gui.Form.cmdGo.Caption("")
+Gui.Form.cmdGo.FontName("Tahoma")
+Gui.Form.cmdGo.FontSize(8.25)
+Gui.Form.cmdGo.SvgPicture("icon_go_color")
+Gui.Form.cmdGo.Event(Click,cmdGo_Click)
+Gui.Form.cmdGo.TabStop(True)
+Gui.Form.cmdGo.TabIndex(70)
+Program.Sub.ScreenSU.End
+
+Program.Sub.Preflight.Start
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+Function.Intrinsic.UI.UsePixels ' Allows you to use Pixels instead of Twips throughout
+
+'by Josh Withrow
+'for Warrior Rig
+'Need to be able to print Material Picklist from GUI Script 3 button
+
+'Callwrapper Mode: 900200
+'	- Starting work order number, starting work order suffix, ending work order number, ending work order suffix
+
+'Hooks
+'	- 15710 - GUI Populate
+'	- 15780 - GUI Script 3 Click
+'
+'	- 49710 - SFDC Populate
+'	- 49762 - SFDC Script 3 Click
+
+V.Local..BulkDeclareString(sButtonText,sScriptButtons)
+
+V.Local.sButtonText.Set("Matl Picklist")
+
+F.Intrinsic.Control.SelectCase(V.Caller.Hook)
+	F.Intrinsic.Control.CaseAny(15710)
+		' When old GUI loads, set Button Text, then end program (for now)
+		V.Passed.000021.Set(V.Local.sButtonText)
+		F.Intrinsic.Control.CallSub(Form_UnLoad)
+	F.Intrinsic.Control.Case(49710)
+		' When new GUI loads, set Button Text, then end program (for now)
+		V.Local.sScriptbuttons.Set(V.passed.MainFormView-windowsUIButtonPanel-1)
+		F.Intrinsic.String.Replace(V.Local.sScriptButtons,"Script 3",V.Local.sButtonText,V.Local.sScriptButtons)
+		V.passed.MainFormView-windowsUIButtonPanel-1.Set(V.Local.sScriptButtons)
+		F.Intrinsic.Control.CallSub(Form_UnLoad)
+	F.Intrinsic.Control.CaseElse
+		'Do Nothing
+F.Intrinsic.Control.EndSelect
+
+'if we got here, then Script 3 was clicked and we want to display the parameters screen.
+gui.Form.txtJobStart.SetFocus
+Gui.Form..Visible(True)
+
+Program.Sub.Main.End
+
+Program.Sub.cmdWO_Click.Start
+'Show Browser
+V.Local..BulkDeclareString(sRet, sJob, sSuffix)
+
+F.Intrinsic.UI.Browser(1000,"",V.Local.sRet)
+F.Intrinsic.Control.If(V.Local.sRet,<>,"***CANCEL***")
+	F.Intrinsic.String.Split(V.Local.sRet,"*!*",V.Local.sRet)
+	V.Local.sJob.Set(V.Local.sRet(0))
+	V.Local.sSuffix.Set(V.Local.sRet(1))
+F.Intrinsic.Control.EndIf
+
+F.Intrinsic.Control.SelectCase(V.Args.ControlName.UCase)
+	F.Intrinsic.Control.Case("CMDBROWSESTART")
+		' Return to Job Start / Sfx Start
+		Gui.Form.txtJobStart.Text(V.Local.sJob)
+		Gui.Form.txtSfxStart.Text(V.Local.sSuffix)
+		Gui.Form.txtJobEnd.Text(V.Local.sJob)
+		Gui.Form.txtSfxEnd.Text(V.Local.sSuffix)
+	F.Intrinsic.Control.Case("CMDBROWSEEND")
+		' Return to Job End / Sfx End
+		Gui.Form.txtJobEnd.Text(V.Local.sJob)
+		Gui.Form.txtSfxEnd.Text(V.Local.sSuffix)
+	F.Intrinsic.Control.CaseElse
+		' but how?
+F.Intrinsic.Control.EndSelect
+Program.Sub.cmdWO_Click.End
+
+Program.Sub.cmdGo_Click.Start
+V.Local..BulkDeclareString(sParams)
+F.Intrinsic.Control.If(V.Screen.Form!txtJobStart.Text.Trim,<>,"")
+	F.Intrinsic.Control.If(V.Screen.Form!txtJobEnd.Text.Trim,<>,"")
+		
+		'If we got to here, there seems to be enough data supplied to use the callwrapper.
+		F.Intrinsic.String.Build("{0}!*!{1}!*!{2}!*!{3}",V.Screen.Form!txtJobStart.Text,V.Screen.Form!txtSfxStart.Text,V.Screen.Form!txtJobEnd.Text,V.Screen.Form!txtSfxEnd.Text,V.Local.sParams)
+		F.Global.General.CallWrapperAsync(900200,V.Local.sParams)
+		
+		F.Intrinsic.Control.CallSub(Form_Unload)
+		
+	F.Intrinsic.Control.Else
+		F.Intrinsic.UI.Msgbox("Ending Work Order Missing.","Error!")
+	F.Intrinsic.Control.EndIf
+F.Intrinsic.Control.Else
+	F.Intrinsic.UI.Msgbox("Starting Work Order Missing.","Error!")
+F.Intrinsic.Control.EndIf
+Program.Sub.cmdGo_Click.End
+
+Program.Sub.Form_UnLoad.Start
+F.Intrinsic.Control.End
+Program.Sub.Form_UnLoad.End
+
+Program.Sub.Comments.Start
+${$5$}$3.0.0.0$}$1
+${$6$}$jwithrow$}$20220318141326958$}$D95tSYIikIvF+oq+s87EtBQePACEH+EyDs2gPmW3WNp3zq+Jao/Io8pw2rRbF6gGhH6f23qPrpLUV4iSImYgNA==
+Program.Sub.Comments.End
